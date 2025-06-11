@@ -309,25 +309,19 @@ def main() -> int:
     args = parser.parse_args()
 
     # Check for environment variables if arguments are not provided
-    if not args.client_id:
-        args.client_id = os.getenv("ATLASSIAN_OAUTH_CLIENT_ID")
-    if not args.client_secret:
-        args.client_secret = os.getenv("ATLASSIAN_OAUTH_CLIENT_SECRET")
-    if not args.redirect_uri:
-        args.redirect_uri = os.getenv("ATLASSIAN_OAUTH_REDIRECT_URI")
-    if not args.scope:
-        args.scope = os.getenv("ATLASSIAN_OAUTH_SCOPE")
+
+    args.client_id = (args.client_id or os.getenv("ATLASSIAN_OAUTH_CLIENT_ID", "")).strip()
+    args.client_secret = (args.client_secret or os.getenv("ATLASSIAN_OAUTH_CLIENT_SECRET","")).strip()
+    args.redirect_uri = (args.redirect_uri or os.getenv("ATLASSIAN_OAUTH_REDIRECT_URI", "")).strip()
+    args.scope = (args.scope or os.getenv("ATLASSIAN_OAUTH_SCOPE", "")).strip()
 
     # Validate required arguments
-    missing = []
-    if not args.client_id:
-        missing.append("client-id")
-    if not args.client_secret:
-        missing.append("client-secret")
-    if not args.redirect_uri:
-        missing.append("redirect-uri")
-    if not args.scope:
-        missing.append("scope")
+    missing = [name for name, value in [
+        ("client-id", args.client_id),
+        ("client-secret", args.client_secret),
+        ("redirect-uri", args.redirect_uri),
+        ("scope", args.scope),
+    ] if not value]
 
     if missing:
         logger.error(f"Missing required arguments: {', '.join(missing)}")
